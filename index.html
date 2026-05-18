@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FC Casacas | Catálogo Exclusivo</title>
+  <meta name="description" content="Catálogo premium y minimalista de camisetas de fútbol de FC Casacas. Calidad de juego, estilo de vida.">
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="brand-link" style="text-decoration: none; display: flex; align-items: center; gap: 0.75rem;">
+        <img src="logo.jpg" alt="FC Casacas Logo" class="brand-logo">
+        <h1>FC <span>Casacas</span></h1>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="active">Catálogo</a>
+        <a href="admin.html">Administración</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Catalog -->
+  <main class="container">
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+      <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; color: var(--color-primary); font-weight: 700; margin-bottom: 0.5rem;">Colección de Temporada</p>
+      <h2 class="section-title" style="margin-bottom: 1rem; font-size: 2.5rem;">El Arte del Fútbol</h2>
+      <p style="color: var(--color-text-light); max-width: 600px; margin: 0 auto; font-size: 1.05rem;">Diseños icónicos, historia y pasión. Explora nuestra exclusiva selección de camisetas premium y añade tu favorita al vestuario.</p>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader">
+      <div style="text-align: center;">
+        <i data-lucide="loader" class="animate-spin" style="width: 32px; height: 32px; margin-bottom: 0.5rem;"></i>
+        <p>Cargando catálogo...</p>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--color-text-light);">
+      <i data-lucide="shirt" style="width: 48px; height: 48px; margin: 0 auto 1rem; stroke-width: 1.5; color: var(--color-primary);"></i>
+      <h3>No hay casacas cargadas</h3>
+      <p style="margin-top: 0.5rem;">Pronto tendremos novedades. Vuelve más tarde o añade una desde el panel de administración.</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="productsGrid" class="products-grid" style="display: none;">
+      <!-- Dynamic Products -->
+    </div>
+  </main>
+
+  <!-- Product Details Modal -->
+  <div id="productModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-image-container" id="modalImageContainer">
+        <!-- Las imágenes y controles del carrusel se inyectarán aquí dinámicamente -->
+      </div>
+      <div class="modal-details">
+        <button id="closeModal" class="modal-close" aria-label="Cerrar modal">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+        <h2 id="modalTitle" class="modal-title"></h2>
+        <div id="modalPrice" class="modal-price"></div>
+        <p id="modalDesc" class="modal-desc"></p>
+        <div class="modal-actions">
+          <a id="btnBuy" href="#" target="_blank" class="btn btn-whatsapp">
+            <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
+            Finalizar compra por WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Configuration & Logic -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+// Configuración de Supabase obtenida automáticamente vía MCP
+const SUPABASE_URL = "https://domzojnsbhqbmbmmjdtq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvbXpvam5zYmhxYm1ibW1qZHRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjQ1NDMsImV4cCI6MjA5NDcwMDU0M30.7SvJBYEZTcBFnfBW00KuQhW7p9b8EO2F2ODV78yTDIg";

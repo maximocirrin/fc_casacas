@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FC Casacas | Panel de Administración</title>
+  <meta name="description" content="Panel de administración de FC Casacas. Añade y administra el catálogo de camisetas de fútbol.">
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="brand-link" style="text-decoration: none; display: flex; align-items: center; gap: 0.75rem;">
+        <img src="logo.jpg" alt="FC Casacas Logo" class="brand-logo">
+      </a>
+      <nav class="nav-links" style="display: flex; align-items: center;">
+        <a href="index.html">Catálogo</a>
+        <a href="admin.html" class="active">Administración</a>
+        <a href="#" id="btnLogout" style="display: none; color: #FC8181; font-weight: 600; margin-left: 2rem;">
+          <i data-lucide="log-out" style="width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; margin-right: 4px;"></i>
+          Cerrar Sesión
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Login Section (Unauthenticated state) -->
+  <div id="loginSection" class="container" style="display: none; max-width: 440px; margin-top: 4rem;">
+    <div class="admin-card">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="background: rgba(123, 175, 212, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+          <i data-lucide="lock" style="width: 28px; height: 28px; color: var(--color-primary);"></i>
+        </div>
+        <h2 style="font-size: 1.75rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">Panel Exclusivo</h2>
+        <p style="color: var(--color-text-light); font-size: 0.95rem;">Inicia sesión con tu cuenta de administrador de FC Casacas.</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Correo Electrónico</label>
+          <input class="form-control" type="email" id="loginEmail" placeholder="admin@fccasacas.com" required autocomplete="username">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label class="form-label" for="loginPassword">Contraseña</label>
+          <input class="form-control" type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button class="btn btn-accent" type="submit" id="btnLoginSubmit" style="width: 100%; padding: 0.9rem;">
+          <i data-lucide="log-in" style="width: 18px; height: 18px;"></i>
+          Ingresar al Panel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Control Section (Authenticated state) -->
+  <div id="adminSection" style="display: none;">
+    <main class="container">
+      <div style="margin-bottom: 3rem;">
+        <h2 class="section-title" style="margin-bottom: 0.5rem;">Panel de Control</h2>
+        <p style="color: var(--color-text-light);">Carga nuevos modelos al catálogo o gestiona las publicaciones existentes en tiempo real.</p>
+      </div>
+
+      <div class="admin-layout">
+        
+        <!-- Cargar Camiseta Card -->
+        <section class="admin-card">
+          <h3 class="admin-card-title">Cargar Nueva Casaca</h3>
+          <form id="productForm">
+            
+            <div class="form-group">
+              <label class="form-label" for="nombre">Nombre de la Camiseta</label>
+              <input class="form-control" type="text" id="nombre" placeholder="Ej: Argentina Qatar 2022" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="descripcion">Descripción</label>
+              <textarea class="form-control" id="descripcion" placeholder="Detalla talle, versión (jugador/hincha), detalles especiales..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="precio">Precio (ARS)</label>
+              <input class="form-control" type="number" id="precio" placeholder="Ej: 45000" min="0" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Fotos de la Casaca (Puedes elegir varias)</label>
+              <div class="file-input-wrapper">
+                <div class="file-input-text">
+                  <i data-lucide="images" style="width: 28px; height: 28px; margin: 0 auto 0.5rem; stroke-width: 1.5; color: var(--color-primary);"></i>
+                  <span>Seleccionar Imágenes</span>
+                  Formato JPG, PNG o WebP. Selecciona una o más.
+                </div>
+                <input type="file" id="foto" accept="image/*" multiple required>
+              </div>
+              <div id="previewGrid" class="preview-grid"></div>
+            </div>
+
+            <button class="btn btn-accent" type="submit" id="btnSubmit" style="width: 100%; margin-top: 1rem; padding: 0.9rem;">
+              <i data-lucide="plus-circle" style="width: 20px; height: 20px;"></i>
+              Publicar Camiseta
+            </button>
+          </form>
+        </section>
+
+        <!-- Administrar Casacas List -->
+        <section class="admin-card" style="min-height: 400px;">
+          <h3 class="admin-card-title">Publicaciones Activas</h3>
+          
+          <div id="adminLoader" class="loader" style="padding: 2rem;">
+            <div style="text-align: center;">
+              <i data-lucide="loader" class="animate-spin" style="width: 28px; height: 28px; margin-bottom: 0.5rem;"></i>
+              <p style="font-size: 0.9rem;">Obteniendo publicaciones...</p>
+            </div>
+          </div>
+
+          <div id="adminEmptyState" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--color-text-light);">
+            <i data-lucide="alert-circle" style="width: 36px; height: 36px; margin: 0 auto 1rem; color: var(--color-text-light);"></i>
+            <h4>No hay publicaciones activas</h4>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Carga tu primer producto a la izquierda.</p>
+          </div>
+
+          <div id="adminList" class="admin-list" style="display: none;">
+            <!-- Dynamic List Items -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Configuration & Logic -->
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

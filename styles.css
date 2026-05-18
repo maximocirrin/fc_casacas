@@ -1482,3 +1482,29 @@ textarea.form-control {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* --- Responsividad de Testimonios --- */
+@media (max-width: 768px) {
+  .testimonials-section {
+    margin-top: 4rem;
+    padding-top: 3.5rem;
+    margin-bottom: 2rem;
+  }
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .testimonial-card {
+    padding: 1.5rem 1.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .testimonial-card {
+    padding: 1.25rem 1.5rem;
+  }
+  .testimonial-text {
+    font-size: 0.95rem;
+  }
+}

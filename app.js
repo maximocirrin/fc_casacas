@@ -29,8 +29,18 @@ const menuLinkAdmin = document.getElementById("menuLinkAdmin");
 const menuLinkLogin = document.getElementById("menuLinkLogin");
 const menuLinkLogout = document.getElementById("menuLinkLogout");
 
+// Cart DOM Elements
+const btnCart = document.getElementById("btnCart");
+const cartBadge = document.getElementById("cartBadge");
+const cartDrawer = document.getElementById("cartDrawer");
+const closeCartBtn = document.getElementById("closeCartBtn");
+const cartItemsContainer = document.getElementById("cartItemsContainer");
+const cartSubtotalValue = document.getElementById("cartSubtotalValue");
+const btnCheckout = document.getElementById("btnCheckout");
+
 // Variables globales
 let products = [];
+let cart = [];
 const WHATSAPP_NUMBER = "5492615987368";
 
 // Inicializar la aplicación
@@ -46,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
   
+  initCart();
   loadProducts();
   setupEventListeners();
   checkAuthStatus();
@@ -123,6 +134,37 @@ function setupEventListeners() {
         console.error("Error al cerrar sesión:", err);
         showToast("Error al cerrar sesión", "error");
       }
+    });
+  }
+
+  // --- Listeners del Carrito ---
+  if (btnCart && cartDrawer) {
+    btnCart.addEventListener("click", (e) => {
+      e.stopPropagation();
+      cartDrawer.classList.add("active");
+      document.body.style.overflow = "hidden"; // Deshabilita scroll de fondo
+    });
+  }
+
+  if (closeCartBtn && cartDrawer) {
+    closeCartBtn.addEventListener("click", () => {
+      cartDrawer.classList.remove("active");
+      document.body.style.overflow = ""; // Reactiva scroll de fondo
+    });
+  }
+
+  if (cartDrawer) {
+    cartDrawer.addEventListener("click", (e) => {
+      if (e.target === cartDrawer) {
+        cartDrawer.classList.remove("active");
+        document.body.style.overflow = "";
+      }
+    });
+  }
+
+  if (btnCheckout) {
+    btnCheckout.addEventListener("click", () => {
+      checkoutCart();
     });
   }
 }
@@ -212,10 +254,16 @@ function renderProducts(items) {
       const encodedText = encodeURIComponent(message);
       const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
       buyBtnHTML = `
-        <a href="${waUrl}" target="_blank" class="btn btn-whatsapp card-buy-btn" style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i>
-          Comprar por WhatsApp
-        </a>
+        <div class="card-actions-wrapper" style="margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%;">
+          <a href="${waUrl}" target="_blank" class="btn btn-whatsapp card-buy-btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.6rem 0.4rem; font-size: 0.8rem; font-weight: 700;">
+            <i data-lucide="shopping-bag" style="width: 14px; height: 14px;"></i>
+            Comprar
+          </a>
+          <button class="btn btn-accent card-add-cart-btn" data-id="${product.id}" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0.6rem 0.4rem; font-size: 0.8rem; font-weight: 700; background: var(--color-primary); color: white; border: none; cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition);">
+            <i data-lucide="shopping-cart" style="width: 14px; height: 14px;"></i>
+            + Carrito
+          </button>
+        </div>
       `;
     }
 
@@ -234,11 +282,20 @@ function renderProducts(items) {
     // Click event para abrir modal
     card.addEventListener("click", () => openModal(product));
 
-    // Detener la propagación para evitar abrir el modal al hacer clic en el botón
+    // Detener la propagación para evitar abrir el modal al hacer clic en el botón de WhatsApp
     const buyBtn = card.querySelector(".card-buy-btn");
     if (buyBtn) {
       buyBtn.addEventListener("click", (e) => {
         e.stopPropagation();
+      });
+    }
+
+    // Detener propagación y agregar al carrito al hacer clic en + Carrito
+    const addCartBtn = card.querySelector(".card-add-cart-btn");
+    if (addCartBtn) {
+      addCartBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        addToCart(product);
       });
     }
     
@@ -297,28 +354,40 @@ function openModal(product) {
   
   setupModalCarousel(images, product.nombre);
 
-  // Configurar botón Comprar en Modal
-  if (btnBuy) {
+  // Configurar botones de acción en Modal
+  const modalActionsContainer = document.getElementById("modalActionsContainer");
+  if (modalActionsContainer) {
     if (isOut) {
-      btnBuy.setAttribute("disabled", "true");
-      btnBuy.style.pointerEvents = "none";
-      btnBuy.className = "btn btn-disabled";
-      btnBuy.innerHTML = `
-        <i data-lucide="slash" style="width: 20px; height: 20px;"></i>
-        Agotado / Sin Stock
+      modalActionsContainer.innerHTML = `
+        <button disabled class="btn btn-disabled" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 1rem;">
+          <i data-lucide="slash" style="width: 20px; height: 20px;"></i>
+          Agotado / Sin Stock
+        </button>
       `;
-      btnBuy.removeAttribute("href");
     } else {
-      btnBuy.removeAttribute("disabled");
-      btnBuy.style.pointerEvents = "auto";
-      btnBuy.className = "btn btn-whatsapp";
-      btnBuy.innerHTML = `
-        <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
-        Terminar compra por WhatsApp
-      `;
       const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(finalPrice)}). ¿La tienen disponible?`;
       const encodedText = encodeURIComponent(message);
-      btnBuy.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+      const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+      modalActionsContainer.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; width: 100%;">
+          <a href="${waUrl}" target="_blank" class="btn btn-whatsapp" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 1rem; font-weight: 700;">
+            <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
+            Comprar WhatsApp
+          </a>
+          <button class="btn btn-accent modal-add-cart-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 1rem; background: var(--color-primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); font-weight: 700;">
+            <i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i>
+            + Carrito
+          </button>
+        </div>
+      `;
+      
+      const modalAddCartBtn = modalActionsContainer.querySelector(".modal-add-cart-btn");
+      if (modalAddCartBtn) {
+        modalAddCartBtn.addEventListener("click", () => {
+          addToCart(product);
+          closeModal();
+        });
+      }
     }
   }
 
@@ -469,4 +538,230 @@ function showToast(message, type = "success") {
       toast.remove();
     }, 300);
   }, 4000);
+}
+
+// --- FUNCIONES DEL CARRITO ---
+
+// Inicializar el carrito
+function initCart() {
+  try {
+    const savedCart = localStorage.getItem("fc_casacas_cart");
+    if (savedCart) {
+      cart = JSON.parse(savedCart);
+    }
+  } catch (error) {
+    console.error("Error al cargar el carrito:", error);
+    cart = [];
+  }
+  updateCartBadge();
+  renderCart();
+}
+
+// Guardar carrito en localStorage y actualizar UI
+function saveCart() {
+  try {
+    localStorage.setItem("fc_casacas_cart", JSON.stringify(cart));
+  } catch (error) {
+    console.error("Error al guardar el carrito:", error);
+  }
+  updateCartBadge();
+  renderCart();
+}
+
+// Agregar producto al carrito
+function addToCart(product) {
+  if (product.agotado) {
+    showToast("Esta camiseta está agotada y no se puede agregar al carrito.", "error");
+    return;
+  }
+
+  const existingItem = cart.find(item => item.id === product.id);
+  const price = product.precio_oferta && Number(product.precio_oferta) > 0 ? Number(product.precio_oferta) : Number(product.precio);
+  
+  // URL de la primera imagen
+  const fallbackImage = "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=600&auto=format&fit=crop";
+  let imageUrl = fallbackImage;
+  if (product.imagenes && product.imagenes.length > 0) {
+    imageUrl = product.imagenes[0];
+  } else if (product.imagen_url) {
+    imageUrl = product.imagen_url;
+  }
+
+  if (existingItem) {
+    existingItem.cantidad += 1;
+    showToast(`Se aumentó la cantidad de "${product.nombre}" en el carrito.`, "success");
+  } else {
+    cart.push({
+      id: product.id,
+      nombre: product.nombre,
+      precio: price,
+      imagen: imageUrl,
+      cantidad: 1
+    });
+    showToast(`"${product.nombre}" agregado al carrito con éxito.`, "success");
+  }
+
+  saveCart();
+  
+  // Si Lucide está disponible
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+}
+
+// Eliminar producto del carrito
+function removeFromCart(productId) {
+  const item = cart.find(item => item.id === productId);
+  const itemName = item ? item.nombre : "Producto";
+  cart = cart.filter(item => item.id !== productId);
+  saveCart();
+  showToast(`"${itemName}" eliminado del carrito.`, "success");
+}
+
+// Actualizar cantidad de producto en el carrito
+function updateCartQty(productId, newQty) {
+  if (newQty < 1) {
+    removeFromCart(productId);
+    return;
+  }
+
+  const item = cart.find(item => item.id === productId);
+  if (item) {
+    item.cantidad = newQty;
+    saveCart();
+  }
+}
+
+// Actualizar el badge flotante en la barra de navegación
+function updateCartBadge() {
+  if (!cartBadge) return;
+  
+  const totalCount = cart.reduce((sum, item) => sum + item.cantidad, 0);
+  
+  if (totalCount > 0) {
+    cartBadge.textContent = totalCount;
+    cartBadge.style.display = "flex";
+  } else {
+    cartBadge.style.display = "none";
+  }
+}
+
+// Renderizar contenido de los items en el drawer del carrito
+function renderCart() {
+  if (!cartItemsContainer || !cartSubtotalValue) return;
+
+  if (cart.length === 0) {
+    cartItemsContainer.innerHTML = `
+      <div class="cart-empty-state">
+        <i data-lucide="shopping-cart" style="width: 48px; height: 48px; color: var(--color-text-light); stroke-width: 1.5;"></i>
+        <h4 style="margin: 0; font-weight: 700; font-family: var(--font-graduate); color: var(--color-text);">Tu carrito está vacío</h4>
+        <p style="margin: 0; color: var(--color-text-light);">¡Explora nuestro catálogo exclusivo y añade tus casacas favoritas!</p>
+      </div>
+    `;
+    cartSubtotalValue.textContent = formatPrice(0);
+    
+    if (btnCheckout) {
+      btnCheckout.setAttribute("disabled", "true");
+      btnCheckout.style.pointerEvents = "none";
+      btnCheckout.style.opacity = "0.6";
+    }
+    
+    if (typeof lucide !== "undefined") {
+      lucide.createIcons();
+    }
+    return;
+  }
+
+  if (btnCheckout) {
+    btnCheckout.removeAttribute("disabled");
+    btnCheckout.style.pointerEvents = "auto";
+    btnCheckout.style.opacity = "1";
+  }
+
+  cartItemsContainer.innerHTML = "";
+  let subtotal = 0;
+
+  cart.forEach(item => {
+    subtotal += item.precio * item.cantidad;
+    
+    const cartItemEl = document.createElement("div");
+    cartItemEl.className = "cart-item";
+    
+    cartItemEl.innerHTML = `
+      <img src="${item.imagen}" alt="${item.nombre}" class="cart-item-img">
+      <div class="cart-item-details">
+        <div>
+          <div class="cart-item-name">${item.nombre}</div>
+          <div class="cart-item-price">${formatPrice(item.precio)}</div>
+        </div>
+        <div class="cart-item-controls">
+          <div class="cart-qty-selector">
+            <button class="cart-qty-btn qty-minus" data-id="${item.id}">
+              <i data-lucide="minus" style="width: 14px; height: 14px;"></i>
+            </button>
+            <span class="cart-qty-val">${item.cantidad}</span>
+            <button class="cart-qty-btn qty-plus" data-id="${item.id}">
+              <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+            </button>
+          </div>
+          <button class="cart-item-remove" data-id="${item.id}" aria-label="Eliminar item">
+            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Listeners para botones de control
+    const minusBtn = cartItemEl.querySelector(".qty-minus");
+    const plusBtn = cartItemEl.querySelector(".qty-plus");
+    const removeBtn = cartItemEl.querySelector(".cart-item-remove");
+    
+    minusBtn.addEventListener("click", () => updateCartQty(item.id, item.cantidad - 1));
+    plusBtn.addEventListener("click", () => updateCartQty(item.id, item.cantidad + 1));
+    removeBtn.addEventListener("click", () => removeFromCart(item.id));
+    
+    cartItemsContainer.appendChild(cartItemEl);
+  });
+
+  cartSubtotalValue.textContent = formatPrice(subtotal);
+
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+}
+
+// Finalizar la compra mandando al WhatsApp con un mensaje estructurado
+function checkoutCart() {
+  if (cart.length === 0) return;
+
+  let message = `¡Hola Casacas FC! 👋 Me gustaría realizar un pedido con los siguientes artículos del catálogo:\n\n`;
+  let total = 0;
+
+  cart.forEach((item, index) => {
+    const itemSubtotal = item.precio * item.cantidad;
+    total += itemSubtotal;
+    message += `${index + 1}. *${item.nombre}*\n`;
+    message += `   Cantidad: ${item.cantidad}\n`;
+    message += `   Precio unitario: ${formatPrice(item.precio)}\n`;
+    message += `   Subtotal: ${formatPrice(itemSubtotal)}\n\n`;
+  });
+
+  message += `*Total del pedido: ${formatPrice(total)}*\n\n`;
+  message += `¿Tienen stock disponible para coordinar el pago y el envío?`;
+
+  const encodedText = encodeURIComponent(message);
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+
+  // Abrir WhatsApp en pestaña nueva
+  window.open(waUrl, "_blank");
+
+  // Vaciar carrito tras la confirmación de checkout
+  cart = [];
+  saveCart();
+  
+  // Cerrar drawer
+  if (cartDrawer) {
+    cartDrawer.classList.remove("active");
+    document.body.style.overflow = "";
+  }
 }

@@ -29,23 +29,31 @@
         <img src="logo.jpg" alt="Casacas FC Logo" class="brand-logo">
         <h1>Casacas <span>FC</span></h1>
       </a>
-      <div class="nav-menu-container">
-        <button id="btnMenu" class="btn-menu" aria-label="Abrir menú">
-          <i data-lucide="menu"></i>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <!-- Cart Button -->
+        <button id="btnCart" class="btn-cart" aria-label="Abrir carrito">
+          <i data-lucide="shopping-cart" style="width: 24px; height: 24px;"></i>
+          <span id="cartBadge" class="cart-badge" style="display: none;">0</span>
         </button>
-        <div id="dropdownMenu" class="dropdown-menu">
-          <a href="index.html" id="menuLinkCatalog" class="dropdown-item">
-            <i data-lucide="book-open"></i> Catálogo
-          </a>
-          <a href="admin.html" id="menuLinkAdmin" class="dropdown-item" style="display: none;">
-            <i data-lucide="settings"></i> Administración
-          </a>
-          <a href="admin.html" id="menuLinkLogin" class="dropdown-item">
-            <i data-lucide="log-in"></i> Iniciar Sesión
-          </a>
-          <a href="#" id="menuLinkLogout" class="dropdown-item" style="display: none; color: #FC8181;">
-            <i data-lucide="log-out"></i> Cerrar Sesión
-          </a>
+        
+        <div class="nav-menu-container">
+          <button id="btnMenu" class="btn-menu" aria-label="Abrir menú">
+            <i data-lucide="menu"></i>
+          </button>
+          <div id="dropdownMenu" class="dropdown-menu">
+            <a href="index.html" id="menuLinkCatalog" class="dropdown-item">
+              <i data-lucide="book-open"></i> Catálogo
+            </a>
+            <a href="admin.html" id="menuLinkAdmin" class="dropdown-item" style="display: none;">
+              <i data-lucide="settings"></i> Administración
+            </a>
+            <a href="admin.html" id="menuLinkLogin" class="dropdown-item">
+              <i data-lucide="log-in"></i> Iniciar Sesión
+            </a>
+            <a href="#" id="menuLinkLogout" class="dropdown-item" style="display: none; color: #FC8181;">
+              <i data-lucide="log-out"></i> Cerrar Sesión
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -93,12 +101,37 @@
         <h2 id="modalTitle" class="modal-title"></h2>
         <div id="modalPrice" class="modal-price"></div>
         <p id="modalDesc" class="modal-desc"></p>
-        <div class="modal-actions">
-          <a id="btnBuy" href="#" target="_blank" class="btn btn-whatsapp">
-            <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
-            Finalizar compra por WhatsApp
-          </a>
+        <div class="modal-actions" id="modalActionsContainer">
+          <!-- Las acciones se inyectarán dinámicamente -->
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar Drawer -->
+  <div id="cartDrawer" class="cart-drawer-overlay">
+    <div class="cart-drawer">
+      <div class="cart-drawer-header">
+        <h3 style="font-family: var(--font-varsity); font-size: 1.5rem; font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: 0.5rem; margin: 0; padding: 0; border: none;">
+          <i data-lucide="shopping-cart" style="color: var(--color-primary); width: 24px; height: 24px;"></i>
+          Mi Carrito
+        </h3>
+        <button id="closeCartBtn" class="cart-drawer-close" aria-label="Cerrar carrito">
+          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+      </div>
+      <div id="cartItemsContainer" class="cart-drawer-body">
+        <!-- Dynamic Cart Items -->
+      </div>
+      <div class="cart-drawer-footer">
+        <div class="cart-subtotal">
+          <span>Subtotal:</span>
+          <span id="cartSubtotalValue">$0</span>
+        </div>
+        <button id="btnCheckout" class="btn btn-whatsapp" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem; border: none; cursor: pointer;">
+          <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
+          Finalizar Compra por WhatsApp
+        </button>
       </div>
     </div>
   </div>

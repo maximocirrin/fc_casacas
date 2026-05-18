@@ -1412,8 +1412,8 @@ textarea.form-control {
 }
 
 .testimonial-stars i.star-filled {
-  color: var(--color-primary);
-  fill: var(--color-primary);
+  color: #FFD700;
+  fill: #FFD700;
   width: 18px;
   height: 18px;
   display: inline-block;
@@ -1439,6 +1439,9 @@ textarea.form-control {
 .testimonial-avatar {
   width: 44px;
   height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
   background: linear-gradient(135deg, var(--color-primary) 0%, #b8860b 100%);
   color: var(--color-secondary);
   font-family: var(--font-varsity);

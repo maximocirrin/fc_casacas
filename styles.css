@@ -1320,3 +1320,50 @@ textarea.form-control {
     right: -100%;
   }
 }
+
+/* ==========================================================================
+   PROMO BANNER ANIMADO (HOT SALE MARQUEE)
+   ========================================================================== */
+
+.promo-banner {
+  background: linear-gradient(90deg, #b8860b 0%, #1a202c 50%, #b8860b 100%);
+  border-bottom: 2.5px solid var(--color-accent);
+  color: var(--color-secondary);
+  font-family: var(--font-graduate);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.65rem 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+.promo-banner-track {
+  display: flex;
+  width: max-content;
+  animation: bannerMarquee 22s linear infinite;
+  gap: 3.5rem;
+  padding-left: 3.5rem;
+}
+
+.promo-banner-track span {
+  display: inline-block;
+  white-space: nowrap;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@keyframes bannerMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

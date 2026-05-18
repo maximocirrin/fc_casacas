@@ -28,8 +28,6 @@ const productForm = document.getElementById("productForm");
 const inputNombre = document.getElementById("nombre");
 const inputDescripcion = document.getElementById("descripcion");
 const inputPrecio = document.getElementById("precio");
-const inputPrecioOferta = document.getElementById("precioOferta");
-const inputAgotado = document.getElementById("agotado");
 const inputFoto = document.getElementById("foto");
 const previewGrid = document.getElementById("previewGrid");
 const btnSubmit = document.getElementById("btnSubmit");
@@ -409,9 +407,6 @@ async function handleFormSubmit(e) {
   const nombre = inputNombre.value.trim();
   const descripcion = inputDescripcion.value.trim();
   const precio = parseFloat(inputPrecio.value);
-  const precioOfertaVal = inputPrecioOferta.value.trim();
-  const precio_oferta = precioOfertaVal ? parseFloat(precioOfertaVal) : null;
-  const agotado = inputAgotado.checked;
 
   if (!nombre || !descripcion || isNaN(precio)) {
     showToast("Por favor, completa todos los campos requeridos.", "error");
@@ -443,8 +438,8 @@ async function handleFormSubmit(e) {
           nombre,
           descripcion,
           precio,
-          precio_oferta,
-          agotado,
+          precio_oferta: null,
+          agotado: false,
           imagen_url: imageUrls[0], // Guardamos la primera como fallback
           imagenes: imageUrls       // Guardamos todas en el array
         }
@@ -458,7 +453,6 @@ async function handleFormSubmit(e) {
     if (productForm) productForm.reset();
     selectedFiles = [];
     if (previewGrid) previewGrid.innerHTML = "";
-    if (inputAgotado) inputAgotado.checked = false;
     
     // Recargar lista de productos
     loadAdminProducts();

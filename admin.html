@@ -104,22 +104,9 @@
               <label class="form-label" for="descripcion">Descripción</label>
               <textarea class="form-control" id="descripcion" placeholder="Detalla talle, versión (jugador/hincha), detalles especiales..." required></textarea>
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label class="form-label" for="precio">Precio Regular (ARS)</label>
-                <input class="form-control" type="number" id="precio" placeholder="Ej: 45000" min="0" required>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="precioOferta">Precio Oferta (ARS)</label>
-                <input class="form-control" type="number" id="precioOferta" placeholder="Opcional" min="0">
-              </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="agotado" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-primary);">
-              <label for="agotado" class="form-label" style="margin-bottom: 0; cursor: pointer; font-weight: 600;">¿Está Agotado / Sin Stock?</label>
+            <div class="form-group">
+              <label class="form-label" for="precio">Precio (ARS)</label>
+              <input class="form-control" type="number" id="precio" placeholder="Ej: 45000" min="0" required>
             </div>
 
             <div class="form-group">

@@ -1,4 +1,10 @@
+@import url('https://fonts.cdnfonts.com/css/varsity-team');
+@import url('https://fonts.googleapis.com/css2?family=Graduate&display=swap');
+
 :root {
+  --font-varsity: 'Varsity Team', sans-serif;
+  --font-graduate: 'Graduate', serif;
+  
   --color-primary: #7BAFD4; /* Celeste Argentina */
   --color-secondary: #FFFFFF; /* Blanco */
   --color-accent: #D4AF37; /* Dorado */
@@ -21,11 +27,23 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-graduate);
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand-link h1,
+.section-title,
+.admin-card-title,
+.hero-content h2,
+.product-title,
+.btn,
+.toast {
+  font-family: var(--font-varsity);
+  letter-spacing: 0.03em;
 }
 
 /* Header */

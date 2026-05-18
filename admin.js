@@ -59,6 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
     lucide.createIcons();
   }
 
+  // Prevenir que el scroll cambie los valores de los inputs tipo number
+  document.addEventListener("wheel", (e) => {
+    if (document.activeElement && document.activeElement.type === "number") {
+      document.activeElement.blur();
+    }
+  });
+
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL.includes("TU_SUPABASE_URL")) {
     showToast("Por favor, configura las credenciales de Supabase en config.js", "error");
     if (adminLoader) adminLoader.style.display = "none";

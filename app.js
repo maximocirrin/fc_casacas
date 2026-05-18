@@ -109,13 +109,13 @@ function setupEventListeners() {
     });
   }
 
-  // Logout desde el menú dropdown
+  // Logout desde el menú dropdown (con scope local para no cerrar sesión en otros dispositivos)
   if (menuLinkLogout) {
     menuLinkLogout.addEventListener("click", async (e) => {
       e.preventDefault();
       dropdownMenu.classList.remove("active");
       try {
-        const { error } = await supabaseClient.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
         if (error) throw error;
         showToast("Sesión cerrada con éxito", "success");
         checkAuthStatus();

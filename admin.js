@@ -194,8 +194,8 @@ async function handleLoginSubmit(e) {
     if (error) throw error;
 
     if (data.user && data.user.email !== "maximocirrin@gmail.com") {
-      // Si el email ingresado no es el del dueño, cerramos sesión inmediatamente
-      await supabaseClient.auth.signOut();
+      // Si el email ingresado no es el del dueño, cerramos sesión localmente de inmediato sin afectar otros dispositivos
+      await supabaseClient.auth.signOut({ scope: 'local' });
       showToast("Acceso no autorizado. Este panel es exclusivo para el dueño.", "error");
     } else {
       showToast("¡Bienvenido de nuevo, Administrador!", "success");
@@ -213,12 +213,13 @@ async function handleLoginSubmit(e) {
   }
 }
 
-// Procesar el cierre de sesión
+// Procesar el cierre de sesión local
 async function handleLogout(e) {
   if (e) e.preventDefault();
   if (dropdownMenu) dropdownMenu.classList.remove("active");
   try {
-    const { error } = await supabaseClient.auth.signOut();
+    // Cerramos sesión únicamente en el dispositivo local
+    const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
     if (error) throw error;
     showToast("Has cerrado sesión correctamente.", "success");
   } catch (error) {

@@ -1411,9 +1411,10 @@ textarea.form-control {
   margin-bottom: 1.25rem;
 }
 
-.testimonial-stars i.star-filled {
-  color: #FFD700;
-  fill: #FFD700;
+.testimonial-stars .star-filled {
+  color: #FFD700 !important;
+  fill: #FFD700 !important;
+  stroke: #FFD700 !important;
   width: 18px;
   height: 18px;
   display: inline-block;

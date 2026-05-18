@@ -178,7 +178,7 @@ function renderProducts(items) {
       imageUrl = product.imagen_url;
     }
 
-    const message = `¡Hola FC Casacas! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
+    const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
     const encodedText = encodeURIComponent(message);
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
 
@@ -242,7 +242,7 @@ function openModal(product) {
   setupModalCarousel(images, product.nombre);
 
   // Generar link de WhatsApp
-  const message = `¡Hola FC Casacas! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
+  const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
   const encodedText = encodeURIComponent(message);
   if (btnBuy) btnBuy.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
 

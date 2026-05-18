@@ -825,20 +825,26 @@ textarea.form-control {
     max-height: 92vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Evita scroll de todo el modal para mantener la equis y la imagen fijas */
+    overflow-y: auto; /* Permite scroll completo de la imagen y descripción de forma natural */
   }
   
   .modal-image-container {
     height: 250px;
-    flex-shrink: 0;
+    flex: none;
     width: 100%;
   }
   
   .modal-details {
     padding: 1.5rem !important;
-    flex-grow: 1;
+    flex: none;
     width: 100%;
-    overflow-y: auto; /* Solo la descripción y botones tienen scroll */
+  }
+
+  .modal-close {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1100; /* Se mantiene al frente y flotando arriba a la derecha en todo momento */
   }
 
   .modal-title {

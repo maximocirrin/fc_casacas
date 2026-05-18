@@ -4,10 +4,13 @@
 :root {
   --font-varsity: 'Varsity Team', sans-serif;
   --font-graduate: 'Graduate', serif;
-  
-  --color-primary: #7BAFD4; /* Celeste Argentina */
-  --color-secondary: #FFFFFF; /* Blanco */
-  --color-accent: #D4AF37; /* Dorado */
+
+  --color-primary: #194768;
+  /* Celeste Argentina */
+  --color-secondary: #FFFFFF;
+  /* Blanco */
+  --color-accent: #e1bc29;
+  /* Dorado */
   --color-bg: #F8F9FA;
   --color-text: #2D3748;
   --color-text-light: #718096;
@@ -34,7 +37,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 .brand-link h1,
 .section-title,
 .admin-card-title,
@@ -228,7 +236,7 @@ header h1 span {
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: var(--transition);
-  border: 1px solid rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
 }
@@ -332,6 +340,7 @@ header h1 span {
   background: transparent;
   color: var(--color-text-light);
 }
+
 .btn-icon:hover {
   background: #EDF2F7;
   color: var(--color-text);
@@ -485,7 +494,7 @@ header h1 span {
   padding: 2.5rem;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(0,0,0,0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
   height: fit-content;
 }
 
@@ -796,8 +805,15 @@ textarea.form-control {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Estilo del botón de WhatsApp */
@@ -820,20 +836,21 @@ textarea.form-control {
   .modal-overlay {
     padding: 0.5rem;
   }
-  
+
   .modal-content {
     max-height: 92vh;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Permite scroll completo de la imagen y descripción de forma natural */
+    overflow-y: auto;
+    /* Permite scroll completo de la imagen y descripción de forma natural */
   }
-  
+
   .modal-image-container {
     height: 250px;
     flex: none;
     width: 100%;
   }
-  
+
   .modal-details {
     padding: 1.5rem !important;
     flex: none;
@@ -844,7 +861,8 @@ textarea.form-control {
     position: fixed;
     top: 1.5rem;
     right: 1.5rem;
-    z-index: 1100; /* Se mantiene al frente y flotando arriba a la derecha en todo momento */
+    z-index: 1100;
+    /* Se mantiene al frente y flotando arriba a la derecha en todo momento */
   }
 
   .modal-title {
@@ -868,24 +886,24 @@ textarea.form-control {
   header {
     padding: 0.75rem 1rem !important;
   }
-  
+
   .header-container {
     width: 100% !important;
     gap: 0.5rem;
   }
-  
+
   .nav-links {
     display: flex;
     align-items: center;
     gap: 0.25rem;
   }
-  
+
   .nav-links a {
     margin-left: 0.75rem !important;
     font-size: 0.85rem !important;
     white-space: nowrap;
   }
-  
+
   #btnLogout {
     margin-left: 0.75rem !important;
     font-size: 0.85rem !important;
@@ -967,7 +985,8 @@ textarea.form-control {
 }
 
 .price-offer {
-  color: #FC8181; /* Rojo de oferta para destacar */
+  color: #FC8181;
+  /* Rojo de oferta para destacar */
   font-weight: 800;
   font-size: 1.25rem;
 }
@@ -1012,6 +1031,13 @@ textarea.form-control {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

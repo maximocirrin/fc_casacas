@@ -932,3 +932,51 @@ textarea.form-control {
     font-size: 0.85rem !important;
   }
 }
+
+/* Badges en tarjetas de productos */
+.product-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 800;
+  z-index: 5;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-varsity);
+}
+
+.badge-oferta {
+  background: var(--color-accent);
+  color: var(--color-secondary);
+}
+
+.badge-agotado {
+  background: #FC8181;
+  color: white;
+}
+
+.price-regular.line-through {
+  text-decoration: line-through;
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  margin-right: 0.5rem;
+  font-weight: 500;
+}
+
+.price-offer {
+  color: #FC8181; /* Rojo de oferta para destacar */
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+
+/* Para deshabilitar enlaces/botones */
+.btn-disabled {
+  background: #E2E8F0 !important;
+  color: #A0AEC0 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  border: 1px solid #CBD5E0 !important;
+}

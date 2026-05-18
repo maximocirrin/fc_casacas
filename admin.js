@@ -28,6 +28,8 @@ const productForm = document.getElementById("productForm");
 const inputNombre = document.getElementById("nombre");
 const inputDescripcion = document.getElementById("descripcion");
 const inputPrecio = document.getElementById("precio");
+const inputPrecioOferta = document.getElementById("precioOferta");
+const inputAgotado = document.getElementById("agotado");
 const inputFoto = document.getElementById("foto");
 const previewGrid = document.getElementById("previewGrid");
 const btnSubmit = document.getElementById("btnSubmit");
@@ -36,6 +38,18 @@ const adminLoader = document.getElementById("adminLoader");
 const adminEmptyState = document.getElementById("adminEmptyState");
 const adminList = document.getElementById("adminList");
 const toastContainer = document.getElementById("toastContainer");
+
+// Elementos del DOM (Modal de Edición)
+const editProductModal = document.getElementById("editProductModal");
+const closeEditModal = document.getElementById("closeEditModal");
+const editProductForm = document.getElementById("editProductForm");
+const inputEditProductId = document.getElementById("editProductId");
+const inputEditNombre = document.getElementById("editNombre");
+const inputEditDescripcion = document.getElementById("editDescripcion");
+const inputEditPrecio = document.getElementById("editPrecio");
+const inputEditPrecioOferta = document.getElementById("editPrecioOferta");
+const inputEditAgotado = document.getElementById("editAgotado");
+const btnEditSubmit = document.getElementById("btnEditSubmit");
 
 // Variables globales
 let activeProducts = [];
@@ -130,6 +144,26 @@ function setupEventListeners() {
   // Cerrar sesión desde el menú dropdown
   if (menuLinkLogout) {
     menuLinkLogout.addEventListener("click", handleLogout);
+  }
+
+  // Modal de edición - Cerrar
+  if (closeEditModal) {
+    closeEditModal.addEventListener("click", () => {
+      if (editProductModal) editProductModal.style.display = "none";
+    });
+  }
+
+  if (editProductModal) {
+    editProductModal.addEventListener("click", (e) => {
+      if (e.target === editProductModal) {
+        editProductModal.style.display = "none";
+      }
+    });
+  }
+
+  // Procesar guardado de edición
+  if (editProductForm) {
+    editProductForm.addEventListener("submit", handleEditFormSubmit);
   }
 }
 
@@ -271,22 +305,62 @@ function renderAdminProducts(items) {
       imageUrl = product.imagen_url;
     }
 
+    const hasDiscount = product.precio_oferta && Number(product.precio_oferta) > 0;
+    const isOut = product.agotado === true;
+
+    let statusBadgesHTML = '';
+    if (isOut) {
+      statusBadgesHTML += `<span style="background: #FC8181; color: white; font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); font-family: var(--font-varsity); margin-left: 0.5rem;">AGOTADO</span>`;
+    }
+    if (hasDiscount) {
+      statusBadgesHTML += `<span style="background: var(--color-accent); color: var(--color-secondary); font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: var(--radius-sm); font-family: var(--font-varsity); margin-left: 0.5rem;">OFERTA</span>`;
+    }
+
+    let priceDisplayHTML = '';
+    if (hasDiscount) {
+      priceDisplayHTML = `
+        <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.85rem; margin-right: 0.4rem;">${formatPrice(product.precio)}</span>
+        <span style="color: #FC8181; font-weight: 700;">${formatPrice(product.precio_oferta)}</span>
+      `;
+    } else {
+      priceDisplayHTML = `<span class="admin-list-price">${formatPrice(product.precio)}</span>`;
+    }
+
     const listItem = document.createElement("div");
     listItem.className = "admin-list-item";
     
     const allUrls = product.imagenes ? product.imagenes.join(",") : (product.imagen_url || "");
     
     listItem.innerHTML = `
-      <img src="${imageUrl}" alt="${product.nombre}" class="admin-list-img">
+      <img src="${imageUrl}" alt="${product.nombre}" class="admin-list-img" style="${isOut ? 'filter: grayscale(0.5);' : ''}">
       <div class="admin-list-info">
-        <h4 class="admin-list-title">${product.nombre}</h4>
-        <span class="admin-list-price">${formatPrice(product.precio)}</span>
+        <h4 class="admin-list-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.25rem;">
+          ${product.nombre}
+          ${statusBadgesHTML}
+        </h4>
+        <div style="margin-top: 0.25rem;">
+          ${priceDisplayHTML}
+        </div>
       </div>
-      <button class="btn btn-danger btn-delete" data-id="${product.id}" data-urls="${allUrls}" aria-label="Eliminar publicación">
-        <i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 4px;"></i>
-        Eliminar
-      </button>
+      <div class="admin-list-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-edit" style="background: var(--color-primary); color: white; border: none; padding: 0.5rem 0.8rem; font-size: 0.85rem; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 4px; cursor: pointer;">
+          <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+          Editar
+        </button>
+        <button class="btn btn-danger btn-delete" data-id="${product.id}" data-urls="${allUrls}" aria-label="Eliminar publicación">
+          <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+          Eliminar
+        </button>
+      </div>
     `;
+
+    // Asignar evento al botón editar
+    const editBtn = listItem.querySelector(".btn-edit");
+    if (editBtn) {
+      editBtn.addEventListener("click", () => {
+        openEditModal(product);
+      });
+    }
 
     // Asignar evento al botón eliminar
     const deleteBtn = listItem.querySelector(".btn-delete");
@@ -335,6 +409,9 @@ async function handleFormSubmit(e) {
   const nombre = inputNombre.value.trim();
   const descripcion = inputDescripcion.value.trim();
   const precio = parseFloat(inputPrecio.value);
+  const precioOfertaVal = inputPrecioOferta.value.trim();
+  const precio_oferta = precioOfertaVal ? parseFloat(precioOfertaVal) : null;
+  const agotado = inputAgotado.checked;
 
   if (!nombre || !descripcion || isNaN(precio)) {
     showToast("Por favor, completa todos los campos requeridos.", "error");
@@ -366,6 +443,8 @@ async function handleFormSubmit(e) {
           nombre,
           descripcion,
           precio,
+          precio_oferta,
+          agotado,
           imagen_url: imageUrls[0], // Guardamos la primera como fallback
           imagenes: imageUrls       // Guardamos todas en el array
         }
@@ -379,6 +458,7 @@ async function handleFormSubmit(e) {
     if (productForm) productForm.reset();
     selectedFiles = [];
     if (previewGrid) previewGrid.innerHTML = "";
+    if (inputAgotado) inputAgotado.checked = false;
     
     // Recargar lista de productos
     loadAdminProducts();
@@ -483,4 +563,83 @@ function showToast(message, type = "success") {
       toast.remove();
     }, 300);
   }, 4000);
+}
+
+// Abrir el Modal de Edición con los valores actuales del producto
+function openEditModal(product) {
+  if (!editProductModal) return;
+
+  // Llenar campos
+  if (inputEditProductId) inputEditProductId.value = product.id;
+  if (inputEditNombre) inputEditNombre.value = product.nombre || "";
+  if (inputEditDescripcion) inputEditDescripcion.value = product.descripcion || "";
+  if (inputEditPrecio) inputEditPrecio.value = product.precio || 0;
+  if (inputEditPrecioOferta) inputEditPrecioOferta.value = product.precio_oferta || "";
+  if (inputEditAgotado) inputEditAgotado.checked = product.agotado === true;
+
+  // Mostrar modal
+  editProductModal.style.display = "flex";
+
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+}
+
+// Procesar el envío del formulario de edición
+async function handleEditFormSubmit(e) {
+  e.preventDefault();
+
+  const id = inputEditProductId.value;
+  const nombre = inputEditNombre.value.trim();
+  const descripcion = inputEditDescripcion.value.trim();
+  const precio = parseFloat(inputEditPrecio.value);
+  const precioOfertaVal = inputEditPrecioOferta.value.trim();
+  const precio_oferta = precioOfertaVal ? parseFloat(precioOfertaVal) : null;
+  const agotado = inputEditAgotado.checked;
+
+  if (!id || !nombre || !descripcion || isNaN(precio)) {
+    showToast("Por favor, completa todos los campos requeridos.", "error");
+    return;
+  }
+
+  // Deshabilitar botón
+  if (btnEditSubmit) {
+    btnEditSubmit.disabled = true;
+    btnEditSubmit.innerHTML = `<i data-lucide="loader" class="animate-spin" style="width: 20px; height: 20px; margin-right: 8px;"></i> Guardando...`;
+  }
+  if (typeof lucide !== "undefined") lucide.createIcons();
+
+  try {
+    // Actualizar registro en Supabase
+    const { error } = await supabaseClient
+      .from("productos")
+      .update({
+        nombre,
+        descripcion,
+        precio,
+        precio_oferta,
+        agotado
+      })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    showToast("¡Camiseta actualizada con éxito!", "success");
+
+    // Cerrar modal
+    if (editProductModal) editProductModal.style.display = "none";
+
+    // Recargar productos
+    loadAdminProducts();
+  } catch (error) {
+    console.error("Error al actualizar casaca:", error);
+    showToast("Hubo un error al actualizar la camiseta.", "error");
+  } finally {
+    // Rehabilitar botón
+    if (btnEditSubmit) {
+      btnEditSubmit.disabled = false;
+      btnEditSubmit.innerHTML = `<i data-lucide="save" style="width: 20px; height: 20px;"></i> Guardar Cambios`;
+    }
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  }
 }

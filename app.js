@@ -178,21 +178,56 @@ function renderProducts(items) {
       imageUrl = product.imagen_url;
     }
 
-    const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
-    const encodedText = encodeURIComponent(message);
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+    const hasDiscount = product.precio_oferta && Number(product.precio_oferta) > 0;
+    const isOut = product.agotado === true;
+    const finalPrice = hasDiscount ? product.precio_oferta : product.precio;
 
-    card.innerHTML = `
-      <div class="product-image-wrap">
-        <img src="${imageUrl}" alt="${product.nombre}" loading="lazy">
-      </div>
-      <div class="product-info">
-        <h3 class="product-title">${product.nombre}</h3>
-        <p class="product-price">${formatPrice(product.precio)}</p>
+    let badgeHTML = '';
+    if (isOut) {
+      badgeHTML = `<span class="product-badge badge-agotado">AGOTADO</span>`;
+    } else if (hasDiscount) {
+      badgeHTML = `<span class="product-badge badge-oferta">OFERTA</span>`;
+    }
+
+    let priceHTML = '';
+    if (hasDiscount) {
+      priceHTML = `
+        <span class="price-regular line-through">${formatPrice(product.precio)}</span>
+        <span class="price-offer">${formatPrice(product.precio_oferta)}</span>
+      `;
+    } else {
+      priceHTML = `<span class="price-regular">${formatPrice(product.precio)}</span>`;
+    }
+
+    let buyBtnHTML = '';
+    if (isOut) {
+      buyBtnHTML = `
+        <button disabled class="btn btn-disabled card-buy-btn" style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i data-lucide="slash" style="width: 18px; height: 18px;"></i>
+          Sin Stock / Agotado
+        </button>
+      `;
+    } else {
+      const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(finalPrice)}). ¿La tienen disponible?`;
+      const encodedText = encodeURIComponent(message);
+      const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+      buyBtnHTML = `
         <a href="${waUrl}" target="_blank" class="btn btn-whatsapp card-buy-btn" style="margin-top: 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
           <i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i>
           Comprar por WhatsApp
         </a>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="product-image-wrap" style="${isOut ? 'filter: grayscale(0.4) opacity(0.85);' : ''}">
+        ${badgeHTML}
+        <img src="${imageUrl}" alt="${product.nombre}" loading="lazy">
+      </div>
+      <div class="product-info">
+        <h3 class="product-title">${product.nombre}</h3>
+        <p class="product-price">${priceHTML}</p>
+        ${buyBtnHTML}
       </div>
     `;
 
@@ -225,8 +260,29 @@ function renderProducts(items) {
 
 // Abrir el Modal de detalles del producto
 function openModal(product) {
-  if (modalTitle) modalTitle.textContent = product.nombre;
-  if (modalPrice) modalPrice.textContent = formatPrice(product.precio);
+  const hasDiscount = product.precio_oferta && Number(product.precio_oferta) > 0;
+  const isOut = product.agotado === true;
+  const finalPrice = hasDiscount ? product.precio_oferta : product.precio;
+
+  if (modalTitle) {
+    if (isOut) {
+      modalTitle.innerHTML = `${product.nombre} <span style="background: #FC8181; color: white; font-size: 0.85rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); margin-left: 0.5rem; font-family: var(--font-varsity);">AGOTADO</span>`;
+    } else {
+      modalTitle.textContent = product.nombre;
+    }
+  }
+
+  if (modalPrice) {
+    if (hasDiscount) {
+      modalPrice.innerHTML = `
+        <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 1.2rem; font-weight: 500; margin-right: 0.5rem;">${formatPrice(product.precio)}</span>
+        <span style="color: #FC8181; font-weight: 800;">${formatPrice(product.precio_oferta)}</span>
+      `;
+    } else {
+      modalPrice.textContent = formatPrice(product.precio);
+    }
+  }
+
   if (modalDesc) modalDesc.textContent = product.descripcion || "Sin descripción disponible.";
 
   // Configurar carrusel de imágenes
@@ -241,13 +297,37 @@ function openModal(product) {
   
   setupModalCarousel(images, product.nombre);
 
-  // Generar link de WhatsApp
-  const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
-  const encodedText = encodeURIComponent(message);
-  if (btnBuy) btnBuy.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+  // Configurar botón Comprar en Modal
+  if (btnBuy) {
+    if (isOut) {
+      btnBuy.setAttribute("disabled", "true");
+      btnBuy.style.pointerEvents = "none";
+      btnBuy.className = "btn btn-disabled";
+      btnBuy.innerHTML = `
+        <i data-lucide="slash" style="width: 20px; height: 20px;"></i>
+        Agotado / Sin Stock
+      `;
+      btnBuy.removeAttribute("href");
+    } else {
+      btnBuy.removeAttribute("disabled");
+      btnBuy.style.pointerEvents = "auto";
+      btnBuy.className = "btn btn-whatsapp";
+      btnBuy.innerHTML = `
+        <i data-lucide="shopping-bag" style="width: 20px; height: 20px;"></i>
+        Terminar compra por WhatsApp
+      `;
+      const message = `¡Hola Casacas FC! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(finalPrice)}). ¿La tienen disponible?`;
+      const encodedText = encodeURIComponent(message);
+      btnBuy.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+    }
+  }
 
   if (productModal) productModal.classList.add("active");
   document.body.style.overflow = "hidden"; // Deshabilita scroll de fondo
+
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
 }
 
 // Configurar Carrusel interactivo dentro del modal

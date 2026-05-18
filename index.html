@@ -29,10 +29,25 @@
         <img src="logo.jpg" alt="FC Casacas Logo" class="brand-logo">
         <h1>FC <span>Casacas</span></h1>
       </a>
-      <nav class="nav-links">
-        <a href="index.html" class="active">Catálogo</a>
-        <a href="admin.html">Administración</a>
-      </nav>
+      <div class="nav-menu-container">
+        <button id="btnMenu" class="btn-menu" aria-label="Abrir menú">
+          <i data-lucide="menu"></i>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+          <a href="index.html" id="menuLinkCatalog" class="dropdown-item">
+            <i data-lucide="book-open"></i> Catálogo
+          </a>
+          <a href="admin.html" id="menuLinkAdmin" class="dropdown-item" style="display: none;">
+            <i data-lucide="settings"></i> Administración
+          </a>
+          <a href="admin.html" id="menuLinkLogin" class="dropdown-item">
+            <i data-lucide="log-in"></i> Iniciar Sesión
+          </a>
+          <a href="#" id="menuLinkLogout" class="dropdown-item" style="display: none; color: #FC8181;">
+            <i data-lucide="log-out"></i> Cerrar Sesión
+          </a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -88,13 +103,12 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
+  <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Configuration & Logic -->
+  <!-- Config & Supabase JS -->
   <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>

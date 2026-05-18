@@ -21,6 +21,14 @@ const modalDesc = document.getElementById("modalDesc");
 const btnBuy = document.getElementById("btnBuy");
 const toastContainer = document.getElementById("toastContainer");
 
+// Menu DOM Elements
+const btnMenu = document.getElementById("btnMenu");
+const dropdownMenu = document.getElementById("dropdownMenu");
+const menuLinkCatalog = document.getElementById("menuLinkCatalog");
+const menuLinkAdmin = document.getElementById("menuLinkAdmin");
+const menuLinkLogin = document.getElementById("menuLinkLogin");
+const menuLinkLogout = document.getElementById("menuLinkLogout");
+
 // Variables globales
 let products = [];
 const WHATSAPP_NUMBER = "5492615987368";
@@ -33,33 +41,90 @@ document.addEventListener("DOMContentLoaded", () => {
   
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL.includes("TU_SUPABASE_URL")) {
     showToast("Por favor, configura las credenciales de Supabase en config.js", "error");
-    loader.style.display = "none";
-    emptyState.style.display = "block";
+    if (loader) loader.style.display = "none";
+    if (emptyState) emptyState.style.display = "block";
     return;
   }
   
   loadProducts();
   setupEventListeners();
+  checkAuthStatus();
 });
+
+// verificar estado de autenticación para mostrar/ocultar secciones en el menú
+async function checkAuthStatus() {
+  if (!supabaseClient) return;
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const isOwner = session && session.user && session.user.email === "maximocirrin@gmail.com";
+    
+    if (isOwner) {
+      if (menuLinkAdmin) menuLinkAdmin.style.display = "flex";
+      if (menuLinkLogout) menuLinkLogout.style.display = "flex";
+      if (menuLinkLogin) menuLinkLogin.style.display = "none";
+    } else {
+      if (menuLinkAdmin) menuLinkAdmin.style.display = "none";
+      if (menuLinkLogout) menuLinkLogout.style.display = "none";
+      if (menuLinkLogin) menuLinkLogin.style.display = "flex";
+    }
+  } catch (err) {
+    console.error("Error comprobando autenticación:", err);
+  }
+}
 
 // Configurar los listeners
 function setupEventListeners() {
   // Cerrar modal al hacer clic en el botón de cerrar
-  closeModalBtn.addEventListener("click", closeModal);
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", closeModal);
+  }
   
   // Cerrar modal al hacer clic fuera del contenido
-  productModal.addEventListener("click", (e) => {
-    if (e.target === productModal) {
+  if (productModal) {
+    productModal.addEventListener("click", (e) => {
+      if (e.target === productModal) {
+        closeModal();
+      }
+    });
+  }
+
+  // Cerrar modal con la tecla Esc
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && productModal && productModal.classList.contains("active")) {
       closeModal();
     }
   });
 
-  // Cerrar modal con la tecla Esc
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && productModal.classList.contains("active")) {
-      closeModal();
-    }
-  });
+  // Toggling del dropdown de menú premium
+  if (btnMenu && dropdownMenu) {
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dropdownMenu.contains(e.target) && e.target !== btnMenu && !btnMenu.contains(e.target)) {
+        dropdownMenu.classList.remove("active");
+      }
+    });
+  }
+
+  // Logout desde el menú dropdown
+  if (menuLinkLogout) {
+    menuLinkLogout.addEventListener("click", async (e) => {
+      e.preventDefault();
+      dropdownMenu.classList.remove("active");
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+        showToast("Sesión cerrada con éxito", "success");
+        checkAuthStatus();
+      } catch (err) {
+        console.error("Error al cerrar sesión:", err);
+        showToast("Error al cerrar sesión", "error");
+      }
+    });
+  }
 }
 
 // Cargar productos desde Supabase
@@ -77,24 +142,26 @@ async function loadProducts() {
   } catch (error) {
     console.error("Error cargando productos:", error);
     showToast("No se pudieron cargar las casacas. Intente nuevamente.", "error");
-    loader.style.display = "none";
-    emptyState.style.display = "block";
+    if (loader) loader.style.display = "none";
+    if (emptyState) emptyState.style.display = "block";
   }
 }
 
 // Renderizar las tarjetas de productos
 function renderProducts(items) {
-  loader.style.display = "none";
+  if (loader) loader.style.display = "none";
   
   if (items.length === 0) {
-    productsGrid.style.display = "none";
-    emptyState.style.display = "block";
+    if (productsGrid) productsGrid.style.display = "none";
+    if (emptyState) emptyState.style.display = "block";
     return;
   }
 
-  emptyState.style.display = "none";
-  productsGrid.innerHTML = "";
-  productsGrid.style.display = "grid";
+  if (emptyState) emptyState.style.display = "none";
+  if (productsGrid) {
+    productsGrid.innerHTML = "";
+    productsGrid.style.display = "grid";
+  }
 
   items.forEach(product => {
     const card = document.createElement("div");
@@ -134,9 +201,11 @@ function renderProducts(items) {
 
     // Detener la propagación para evitar abrir el modal al hacer clic en el botón
     const buyBtn = card.querySelector(".card-buy-btn");
-    buyBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
+    if (buyBtn) {
+      buyBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+    }
     
     // Soporte para accesibilidad de teclado
     card.addEventListener("keydown", (e) => {
@@ -146,7 +215,7 @@ function renderProducts(items) {
       }
     });
 
-    productsGrid.appendChild(card);
+    if (productsGrid) productsGrid.appendChild(card);
   });
 
   if (typeof lucide !== "undefined") {
@@ -156,9 +225,9 @@ function renderProducts(items) {
 
 // Abrir el Modal de detalles del producto
 function openModal(product) {
-  modalTitle.textContent = product.nombre;
-  modalPrice.textContent = formatPrice(product.precio);
-  modalDesc.textContent = product.descripcion || "Sin descripción disponible.";
+  if (modalTitle) modalTitle.textContent = product.nombre;
+  if (modalPrice) modalPrice.textContent = formatPrice(product.precio);
+  if (modalDesc) modalDesc.textContent = product.descripcion || "Sin descripción disponible.";
 
   // Configurar carrusel de imágenes
   let images = [];
@@ -175,14 +244,15 @@ function openModal(product) {
   // Generar link de WhatsApp
   const message = `¡Hola FC Casacas! 👋 Me interesa la camiseta *${product.nombre}* (${formatPrice(product.precio)}). ¿La tienen disponible?`;
   const encodedText = encodeURIComponent(message);
-  btnBuy.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+  if (btnBuy) btnBuy.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
 
-  productModal.classList.add("active");
+  if (productModal) productModal.classList.add("active");
   document.body.style.overflow = "hidden"; // Deshabilita scroll de fondo
 }
 
 // Configurar Carrusel interactivo dentro del modal
 function setupModalCarousel(images, productName) {
+  if (!modalImageContainer) return;
   modalImageContainer.innerHTML = "";
   
   const container = document.createElement("div");
@@ -242,15 +312,22 @@ function setupModalCarousel(images, productName) {
       slides.forEach(s => s.classList.remove("active"));
       dots.forEach(d => d.classList.remove("active"));
 
-      slides[slideIndex].classList.add("active");
-      dots[slideIndex].classList.add("active");
+      if (slides[slideIndex]) slides[slideIndex].classList.add("active");
+      if (dots[slideIndex]) dots[slideIndex].classList.add("active");
     }
 
-    prevBtn.addEventListener("click", () => showSlide(slideIndex - 1));
-    nextBtn.addEventListener("click", () => showSlide(slideIndex + 1));
+    prevBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showSlide(slideIndex - 1);
+    });
+    nextBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showSlide(slideIndex + 1);
+    });
     
     dots.forEach(dot => {
-      dot.addEventListener("click", () => {
+      dot.addEventListener("click", (e) => {
+        e.stopPropagation();
         const idx = parseInt(dot.getAttribute("data-slide"));
         showSlide(idx);
       });
@@ -262,7 +339,7 @@ function setupModalCarousel(images, productName) {
 
 // Cerrar el Modal
 function closeModal() {
-  productModal.classList.remove("active");
+  if (productModal) productModal.classList.remove("active");
   document.body.style.overflow = ""; // Reactiva scroll
 }
 
@@ -277,6 +354,7 @@ function formatPrice(value) {
 
 // Mostrar notificaciones Toast personalizadas
 function showToast(message, type = "success") {
+  if (!toastContainer) return;
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   

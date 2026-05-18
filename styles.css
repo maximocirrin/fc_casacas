@@ -76,6 +76,7 @@ header h1 {
   gap: 8px;
 }
 
+
 header h1 span {
   color: var(--color-accent);
 }
@@ -102,16 +103,90 @@ header h1 span {
   border-color: var(--color-primary);
 }
 
-.nav-links a {
-  text-decoration: none;
-  color: var(--color-text-light);
-  font-weight: 500;
-  margin-left: 2rem;
-  transition: var(--transition);
-  font-size: 0.95rem;
+/* Nav Menu Container & Dropdown Styling */
+.nav-menu-container {
+  position: relative;
+  display: inline-block;
 }
 
-.nav-links a:hover, .nav-links a.active {
+.btn-menu {
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  outline: none;
+}
+
+.btn-menu:hover {
+  background: rgba(123, 175, 212, 0.15);
+  color: var(--color-primary);
+}
+
+.btn-menu i {
+  width: 24px;
+  height: 24px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(123, 175, 212, 0.2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 220px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-menu.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.dropdown-item i {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-light);
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background: rgba(123, 175, 212, 0.15);
+  color: var(--color-primary);
+}
+
+.dropdown-item:hover i {
   color: var(--color-primary);
 }
 
@@ -133,7 +208,6 @@ header h1 span {
 /* Loader */
 .loader {
   display: flex;
-  justify-content: center;
   align-items: center;
   padding: 4rem;
   color: var(--color-primary);

@@ -28,14 +28,25 @@
       <a href="index.html" class="brand-link" style="text-decoration: none; display: flex; align-items: center; gap: 0.75rem;">
         <img src="logo.jpg" alt="FC Casacas Logo" class="brand-logo">
       </a>
-      <nav class="nav-links" style="display: flex; align-items: center;">
-        <a href="index.html">Catálogo</a>
-        <a href="admin.html" class="active">Administración</a>
-        <a href="#" id="btnLogout" style="display: none; color: #FC8181; font-weight: 600; margin-left: 2rem;">
-          <i data-lucide="log-out" style="width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; margin-right: 4px;"></i>
-          Cerrar Sesión
-        </a>
-      </nav>
+      <div class="nav-menu-container">
+        <button id="btnMenu" class="btn-menu" aria-label="Abrir menú">
+          <i data-lucide="menu"></i>
+        </button>
+        <div id="dropdownMenu" class="dropdown-menu">
+          <a href="index.html" id="menuLinkCatalog" class="dropdown-item">
+            <i data-lucide="book-open"></i> Catálogo
+          </a>
+          <a href="admin.html" id="menuLinkAdmin" class="dropdown-item" style="display: none;">
+            <i data-lucide="settings"></i> Administración
+          </a>
+          <a href="#" id="menuLinkLogin" class="dropdown-item">
+            <i data-lucide="log-in"></i> Iniciar Sesión
+          </a>
+          <a href="#" id="menuLinkLogout" class="dropdown-item" style="display: none; color: #FC8181;">
+            <i data-lucide="log-out"></i> Cerrar Sesión
+          </a>
+        </div>
+      </div>
     </div>
   </header>
 

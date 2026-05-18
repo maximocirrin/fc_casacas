@@ -14,7 +14,14 @@ const loginForm = document.getElementById("loginForm");
 const inputLoginEmail = document.getElementById("loginEmail");
 const inputLoginPassword = document.getElementById("loginPassword");
 const btnLoginSubmit = document.getElementById("btnLoginSubmit");
-const btnLogout = document.getElementById("btnLogout");
+
+// Menu DOM Elements
+const btnMenu = document.getElementById("btnMenu");
+const dropdownMenu = document.getElementById("dropdownMenu");
+const menuLinkCatalog = document.getElementById("menuLinkCatalog");
+const menuLinkAdmin = document.getElementById("menuLinkAdmin");
+const menuLinkLogin = document.getElementById("menuLinkLogin");
+const menuLinkLogout = document.getElementById("menuLinkLogout");
 
 // Elementos del DOM (Administración de productos)
 const productForm = document.getElementById("productForm");
@@ -42,8 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL.includes("TU_SUPABASE_URL")) {
     showToast("Por favor, configura las credenciales de Supabase en config.js", "error");
-    adminLoader.style.display = "none";
-    adminEmptyState.style.display = "block";
+    if (adminLoader) adminLoader.style.display = "none";
+    if (adminEmptyState) adminEmptyState.style.display = "block";
     return;
   }
 
@@ -53,19 +60,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Configurar el listener de estado de autenticación de Supabase
 function setupAuthStateListener() {
+  if (!supabaseClient) return;
   // Comprobar la sesión actual y escuchar cambios de estado
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      // Usuario autenticado
-      loginSection.style.display = "none";
-      adminSection.style.display = "block";
-      btnLogout.style.display = "inline-block";
+    const isOwner = session && session.user && session.user.email === "maximocirrin@gmail.com";
+    
+    if (isOwner) {
+      // Usuario autenticado como dueño
+      if (loginSection) loginSection.style.display = "none";
+      if (adminSection) adminSection.style.display = "block";
+      
+      // Ajustar visibilidades en el menú dropdown
+      if (menuLinkAdmin) menuLinkAdmin.style.display = "flex";
+      if (menuLinkLogout) menuLinkLogout.style.display = "flex";
+      if (menuLinkLogin) menuLinkLogin.style.display = "none";
+      
       loadAdminProducts();
     } else {
-      // Usuario no autenticado
-      loginSection.style.display = "block";
-      adminSection.style.display = "none";
-      btnLogout.style.display = "none";
+      // Usuario no autenticado (o no es el dueño)
+      if (loginSection) loginSection.style.display = "block";
+      if (adminSection) adminSection.style.display = "none";
+      
+      // Ajustar visibilidades en el menú dropdown
+      if (menuLinkAdmin) menuLinkAdmin.style.display = "none";
+      if (menuLinkLogout) menuLinkLogout.style.display = "none";
+      if (menuLinkLogin) menuLinkLogin.style.display = "flex";
     }
     
     if (typeof lucide !== "undefined") {
@@ -77,23 +96,46 @@ function setupAuthStateListener() {
 // Configurar los listeners de eventos de UI
 function setupEventListeners() {
   // Previsualizar las fotos seleccionadas (múltiples)
-  inputFoto.addEventListener("change", () => {
-    selectedFiles = Array.from(inputFoto.files);
-    renderPreviews();
-  });
+  if (inputFoto) {
+    inputFoto.addEventListener("change", () => {
+      selectedFiles = Array.from(inputFoto.files);
+      renderPreviews();
+    });
+  }
 
   // Guardar/Publicar el formulario de producto
-  productForm.addEventListener("submit", handleFormSubmit);
+  if (productForm) {
+    productForm.addEventListener("submit", handleFormSubmit);
+  }
 
   // Procesar inicio de sesión
-  loginForm.addEventListener("submit", handleLoginSubmit);
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLoginSubmit);
+  }
 
-  // Cerrar sesión
-  btnLogout.addEventListener("click", handleLogout);
+  // Toggling del dropdown de menú premium
+  if (btnMenu && dropdownMenu) {
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("active");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!dropdownMenu.contains(e.target) && e.target !== btnMenu && !btnMenu.contains(e.target)) {
+        dropdownMenu.classList.remove("active");
+      }
+    });
+  }
+
+  // Cerrar sesión desde el menú dropdown
+  if (menuLinkLogout) {
+    menuLinkLogout.addEventListener("click", handleLogout);
+  }
 }
 
 // Renderizar las miniaturas de previsualización
 function renderPreviews() {
+  if (!previewGrid) return;
   previewGrid.innerHTML = "";
   if (selectedFiles.length === 0) return;
   
@@ -137,8 +179,10 @@ async function handleLoginSubmit(e) {
   }
 
   // Deshabilitar botón
-  btnLoginSubmit.disabled = true;
-  btnLoginSubmit.innerHTML = `<i data-lucide="loader" class="animate-spin" style="width: 18px; height: 18px; margin-right: 8px;"></i> Ingresando...`;
+  if (btnLoginSubmit) {
+    btnLoginSubmit.disabled = true;
+    btnLoginSubmit.innerHTML = `<i data-lucide="loader" class="animate-spin" style="width: 18px; height: 18px; margin-right: 8px;"></i> Ingresando...`;
+  }
   if (typeof lucide !== "undefined") lucide.createIcons();
 
   try {
@@ -149,21 +193,30 @@ async function handleLoginSubmit(e) {
 
     if (error) throw error;
 
-    showToast("¡Bienvenido de nuevo, Administrador!", "success");
-    loginForm.reset();
+    if (data.user && data.user.email !== "maximocirrin@gmail.com") {
+      // Si el email ingresado no es el del dueño, cerramos sesión inmediatamente
+      await supabaseClient.auth.signOut();
+      showToast("Acceso no autorizado. Este panel es exclusivo para el dueño.", "error");
+    } else {
+      showToast("¡Bienvenido de nuevo, Administrador!", "success");
+      if (loginForm) loginForm.reset();
+    }
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
     showToast("Credenciales inválidas o correo no registrado.", "error");
   } finally {
-    btnLoginSubmit.disabled = false;
-    btnLoginSubmit.innerHTML = `<i data-lucide="log-in" style="width: 18px; height: 18px;"></i> Ingresar al Panel`;
+    if (btnLoginSubmit) {
+      btnLoginSubmit.disabled = false;
+      btnLoginSubmit.innerHTML = `<i data-lucide="log-in" style="width: 18px; height: 18px;"></i> Ingresar al Panel`;
+    }
     if (typeof lucide !== "undefined") lucide.createIcons();
   }
 }
 
 // Procesar el cierre de sesión
 async function handleLogout(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
+  if (dropdownMenu) dropdownMenu.classList.remove("active");
   try {
     const { error } = await supabaseClient.auth.signOut();
     if (error) throw error;
@@ -177,9 +230,9 @@ async function handleLogout(e) {
 // Cargar todas las publicaciones en la lista de gestión
 async function loadAdminProducts() {
   try {
-    adminLoader.style.display = "flex";
-    adminList.style.display = "none";
-    adminEmptyState.style.display = "none";
+    if (adminLoader) adminLoader.style.display = "flex";
+    if (adminList) adminList.style.display = "none";
+    if (adminEmptyState) adminEmptyState.style.display = "none";
 
     const { data, error } = await supabaseClient
       .from("productos")
@@ -193,24 +246,26 @@ async function loadAdminProducts() {
   } catch (error) {
     console.error("Error al cargar administrador:", error);
     showToast("No se pudo cargar la lista de gestión", "error");
-    adminLoader.style.display = "none";
-    adminEmptyState.style.display = "block";
+    if (adminLoader) adminLoader.style.display = "none";
+    if (adminEmptyState) adminEmptyState.style.display = "block";
   }
 }
 
 // Renderizar la lista de productos con controles de administrador
 function renderAdminProducts(items) {
-  adminLoader.style.display = "none";
+  if (adminLoader) adminLoader.style.display = "none";
 
   if (items.length === 0) {
-    adminList.style.display = "none";
-    adminEmptyState.style.display = "block";
+    if (adminList) adminList.style.display = "none";
+    if (adminEmptyState) adminEmptyState.style.display = "block";
     return;
   }
 
-  adminEmptyState.style.display = "none";
-  adminList.innerHTML = "";
-  adminList.style.display = "flex";
+  if (adminEmptyState) adminEmptyState.style.display = "none";
+  if (adminList) {
+    adminList.innerHTML = "";
+    adminList.style.display = "flex";
+  }
 
   items.forEach(product => {
     const fallbackImage = "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=600&auto=format&fit=crop";
@@ -240,14 +295,16 @@ function renderAdminProducts(items) {
 
     // Asignar evento al botón eliminar
     const deleteBtn = listItem.querySelector(".btn-delete");
-    deleteBtn.addEventListener("click", () => {
-      const id = deleteBtn.getAttribute("data-id");
-      const urlsString = deleteBtn.getAttribute("data-urls");
-      const urls = urlsString ? urlsString.split(",") : [];
-      handleDeleteProduct(id, urls);
-    });
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => {
+        const id = deleteBtn.getAttribute("data-id");
+        const urlsString = deleteBtn.getAttribute("data-urls");
+        const urls = urlsString ? urlsString.split(",") : [];
+        handleDeleteProduct(id, urls);
+      });
+    }
 
-    adminList.appendChild(listItem);
+    if (adminList) adminList.appendChild(listItem);
   });
 
   if (typeof lucide !== "undefined") {
@@ -295,8 +352,10 @@ async function handleFormSubmit(e) {
   }
 
   // Deshabilitar botón y cambiar texto
-  btnSubmit.disabled = true;
-  btnSubmit.innerHTML = `<i data-lucide="loader" class="animate-spin" style="width: 20px; height: 20px;"></i> Subiendo...`;
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i data-lucide="loader" class="animate-spin" style="width: 20px; height: 20px;"></i> Subiendo...`;
+  }
   if (typeof lucide !== "undefined") lucide.createIcons();
 
   try {
@@ -322,9 +381,9 @@ async function handleFormSubmit(e) {
     showToast("¡Camiseta publicada con éxito!", "success");
     
     // Resetear formulario
-    productForm.reset();
+    if (productForm) productForm.reset();
     selectedFiles = [];
-    previewGrid.innerHTML = "";
+    if (previewGrid) previewGrid.innerHTML = "";
     
     // Recargar lista de productos
     loadAdminProducts();
@@ -333,8 +392,10 @@ async function handleFormSubmit(e) {
     showToast("Hubo un error al publicar la camiseta. Revisa el storage y la conexión.", "error");
   } finally {
     // Rehabilitar botón
-    btnSubmit.disabled = false;
-    btnSubmit.innerHTML = `<i data-lucide="plus-circle" style="width: 20px; height: 20px;"></i> Publicar Camiseta`;
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = `<i data-lucide="plus-circle" style="width: 20px; height: 20px;"></i> Publicar Camiseta`;
+    }
     if (typeof lucide !== "undefined") lucide.createIcons();
   }
 }
@@ -392,6 +453,7 @@ function formatPrice(value) {
 
 // Mostrar notificaciones Toast
 function showToast(message, type = "success") {
+  if (!toastContainer) return;
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   

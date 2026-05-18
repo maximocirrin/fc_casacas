@@ -33,6 +33,9 @@ const menuLinkLogout = document.getElementById("menuLinkLogout");
 let products = [];
 const WHATSAPP_NUMBER = "5492615987368";
 
+// Lista de correos autorizados para el panel de administración
+const ALLOWED_ADMIN_EMAILS = ["maximocirrin@gmail.com", "fabricirrin@hotmail.com"];
+
 // Inicializar la aplicación
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof lucide !== "undefined") {
@@ -56,7 +59,7 @@ async function checkAuthStatus() {
   if (!supabaseClient) return;
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    const isOwner = session && session.user && session.user.email === "maximocirrin@gmail.com";
+    const isOwner = session && session.user && session.user.email && ALLOWED_ADMIN_EMAILS.includes(session.user.email.toLowerCase().trim());
     
     if (isOwner) {
       if (menuLinkAdmin) menuLinkAdmin.style.display = "flex";

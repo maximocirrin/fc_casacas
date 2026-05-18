@@ -41,6 +41,9 @@ const toastContainer = document.getElementById("toastContainer");
 let activeProducts = [];
 let selectedFiles = [];
 
+// Lista de correos autorizados para el panel de administración
+const ALLOWED_ADMIN_EMAILS = ["maximocirrin@gmail.com", "fabricirrin@hotmail.com"];
+
 // Inicializar la aplicación
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof lucide !== "undefined") {
@@ -63,7 +66,7 @@ function setupAuthStateListener() {
   if (!supabaseClient) return;
   // Comprobar la sesión actual y escuchar cambios de estado
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    const isOwner = session && session.user && session.user.email === "maximocirrin@gmail.com";
+    const isOwner = session && session.user && session.user.email && ALLOWED_ADMIN_EMAILS.includes(session.user.email.toLowerCase().trim());
     
     if (isOwner) {
       // Usuario autenticado como dueño
@@ -193,7 +196,8 @@ async function handleLoginSubmit(e) {
 
     if (error) throw error;
 
-    if (data.user && data.user.email !== "maximocirrin@gmail.com") {
+    const emailKey = data.user && data.user.email ? data.user.email.toLowerCase().trim() : "";
+    if (data.user && !ALLOWED_ADMIN_EMAILS.includes(emailKey)) {
       // Si el email ingresado no es el del dueño, cerramos sesión localmente de inmediato sin afectar otros dispositivos
       await supabaseClient.auth.signOut({ scope: 'local' });
       showToast("Acceso no autorizado. Este panel es exclusivo para el dueño.", "error");

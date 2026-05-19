@@ -271,6 +271,7 @@ async function loadAdminProducts() {
     const { data, error } = await supabaseClient
       .from("productos")
       .select("*")
+      .order("orden", { ascending: true })
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -301,7 +302,7 @@ function renderAdminProducts(items) {
     adminList.style.display = "flex";
   }
 
-  items.forEach(product => {
+  items.forEach((product, index) => {
     const fallbackImage = "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=600&auto=format&fit=crop";
     let imageUrl = fallbackImage;
     if (product.imagenes && product.imagenes.length > 0) {
@@ -348,6 +349,12 @@ function renderAdminProducts(items) {
         </div>
       </div>
       <div class="admin-list-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-up" data-index="${index}" title="Subir" style="background: var(--color-surface); border: 1px solid #EDF2F7; padding: 0.5rem; border-radius: var(--radius-sm); cursor: pointer;" ${index === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+          <i data-lucide="arrow-up" style="width: 14px; height: 14px;"></i>
+        </button>
+        <button class="btn btn-secondary btn-down" data-index="${index}" title="Bajar" style="background: var(--color-surface); border: 1px solid #EDF2F7; padding: 0.5rem; border-radius: var(--radius-sm); cursor: pointer;" ${index === items.length - 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+          <i data-lucide="arrow-down" style="width: 14px; height: 14px;"></i>
+        </button>
         <button class="btn btn-secondary btn-edit" style="background: var(--color-primary); color: white; border: none; padding: 0.5rem 0.8rem; font-size: 0.85rem; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 4px; cursor: pointer;">
           <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
           Editar
@@ -358,6 +365,13 @@ function renderAdminProducts(items) {
         </button>
       </div>
     `;
+
+    // Asignar eventos de reordenamiento
+    const upBtn = listItem.querySelector(".btn-up");
+    if (upBtn) upBtn.addEventListener("click", () => handleMoveProduct(index, -1));
+
+    const downBtn = listItem.querySelector(".btn-down");
+    if (downBtn) downBtn.addEventListener("click", () => handleMoveProduct(index, 1));
 
     // Asignar evento al botón editar
     const editBtn = listItem.querySelector(".btn-edit");
@@ -447,6 +461,7 @@ async function handleFormSubmit(e) {
           precio,
           precio_oferta: null,
           agotado: false,
+          orden: activeProducts.length, // Al final
           imagen_url: imageUrls[0], // Guardamos la primera como fallback
           imagenes: imageUrls       // Guardamos todas en el array
         }
@@ -642,5 +657,35 @@ async function handleEditFormSubmit(e) {
       btnEditSubmit.innerHTML = `<i data-lucide="save" style="width: 20px; height: 20px;"></i> Guardar Cambios`;
     }
     if (typeof lucide !== "undefined") lucide.createIcons();
+  }
+}
+
+// Función para reordenar un producto
+async function handleMoveProduct(index, direction) {
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= activeProducts.length) return;
+
+  const productA = activeProducts[index];
+  const productB = activeProducts[targetIndex];
+
+  const orderA = productA.orden != null ? productA.orden : index;
+  const orderB = productB.orden != null ? productB.orden : targetIndex;
+
+  let newOrderA = orderB;
+  let newOrderB = orderA;
+  if (newOrderA === newOrderB) {
+     newOrderA = targetIndex;
+     newOrderB = index;
+  }
+
+  try {
+    await Promise.all([
+      supabaseClient.from("productos").update({ orden: newOrderA }).eq("id", productA.id),
+      supabaseClient.from("productos").update({ orden: newOrderB }).eq("id", productB.id)
+    ]);
+    loadAdminProducts();
+  } catch (error) {
+    console.error("Error al reordenar:", error);
+    showToast("Hubo un error al reordenar.", "error");
   }
 }

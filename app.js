@@ -20,6 +20,7 @@ const modalPrice = document.getElementById("modalPrice");
 const modalDesc = document.getElementById("modalDesc");
 const btnBuy = document.getElementById("btnBuy");
 const toastContainer = document.getElementById("toastContainer");
+const searchInput = document.getElementById("searchInput");
 
 // Menu DOM Elements
 const btnMenu = document.getElementById("btnMenu");
@@ -167,6 +168,18 @@ function setupEventListeners() {
       checkoutCart();
     });
   }
+
+  // --- Buscador ---
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = products.filter(p => 
+        p.nombre.toLowerCase().includes(term) || 
+        (p.descripcion && p.descripcion.toLowerCase().includes(term))
+      );
+      renderProducts(filtered);
+    });
+  }
 }
 
 // Cargar productos desde Supabase
@@ -175,6 +188,7 @@ async function loadProducts() {
     const { data, error } = await supabaseClient
       .from("productos")
       .select("*")
+      .order("orden", { ascending: true })
       .order("created_at", { ascending: false });
 
     if (error) throw error;

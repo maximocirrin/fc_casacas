@@ -203,6 +203,11 @@ async function loadProducts() {
   }
 }
 
+function getOptimizedImageUrl(url, width = 800) {
+  if (!url) return 'https://via.placeholder.com/800x800.png?text=Sin+Imagen';
+  return url;
+}
+
 // Renderizar las tarjetas de productos
 function renderProducts(items) {
   if (loader) loader.style.display = "none";
@@ -233,6 +238,7 @@ function renderProducts(items) {
     } else if (product.imagen_url) {
       imageUrl = product.imagen_url;
     }
+    imageUrl = getOptimizedImageUrl(imageUrl, 800);
 
     const hasDiscount = product.precio_oferta && Number(product.precio_oferta) > 0;
     const isOut = product.agotado === true;
@@ -366,7 +372,7 @@ function openModal(product) {
     images = ["https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=600&auto=format&fit=crop"];
   }
   
-  setupModalCarousel(images, product.nombre);
+  setupModalCarousel(images.map(img => getOptimizedImageUrl(img, 1000)), product.nombre);
 
   // Configurar botones de acción en Modal
   const modalActionsContainer = document.getElementById("modalActionsContainer");
@@ -600,6 +606,7 @@ function addToCart(product) {
   } else if (product.imagen_url) {
     imageUrl = product.imagen_url;
   }
+  imageUrl = getOptimizedImageUrl(imageUrl, 200);
 
   if (existingItem) {
     existingItem.cantidad += 1;

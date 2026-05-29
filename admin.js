@@ -286,6 +286,11 @@ async function loadAdminProducts() {
   }
 }
 
+function getOptimizedImageUrl(url, width = 800) {
+  if (!url) return 'https://via.placeholder.com/800x800.png?text=Sin+Imagen';
+  return url;
+}
+
 // Renderizar la lista de productos con controles de administrador
 function renderAdminProducts(items) {
   if (adminLoader) adminLoader.style.display = "none";
@@ -310,6 +315,7 @@ function renderAdminProducts(items) {
     } else if (product.imagen_url) {
       imageUrl = product.imagen_url;
     }
+    imageUrl = getOptimizedImageUrl(imageUrl, 200);
 
     const hasDiscount = product.precio_oferta && Number(product.precio_oferta) > 0;
     const isOut = product.agotado === true;
